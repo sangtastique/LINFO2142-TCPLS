@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
             load_private_key(&ctx, optarg);
             break;
         case 'a':
-            // TODO
+            // TODO : support more than one extra
             if (n_extra_host != 0) {
                 fprintf(stderr, "-A/-a can only be specified once for now\n");
                 return 1;
@@ -482,9 +482,12 @@ int main(int argc, char **argv) {
 
     struct sockaddr_storage extra_sa;
     socklen_t extra_salen;
-    if (resolve_address((struct sockaddr *)&extra_sa, &extra_salen, host, port, 0, SOCK_STREAM, IPPROTO_TCP) != 0) {
-        extra_salen = 0;
+    if(n_extra_host != 0) { // TODO : adapt for more than one extra host
+        if (resolve_address((struct sockaddr *)&extra_sa, &extra_salen, extra_host, port, 0, SOCK_STREAM, IPPROTO_TCP) != 0) {
+            extra_salen = 0;
+        }
     }
+    
 
     signal(SIGPIPE, SIG_IGN);
     FILE *qlog_file = NULL;
