@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Rapido implementation (https://github.com/mpiraux/rapido)
+/rapido
+
+# Rapido executable
+**/rapido
+
+# Iperf versions
+/iperf-3.9
+/iperf-mptcp
