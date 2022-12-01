@@ -490,7 +490,7 @@ int main(int argc, char **argv) {
     }
 
     struct sockaddr_storage extra_sa;
-    socklen_t extra_salen;
+    socklen_t extra_salen = 0;
     if(n_extra_host != 0) { // TODO : adapt for more than one extra host
         if (resolve_address((struct sockaddr *)&extra_sa, &extra_salen, extra_host, port, 0, SOCK_STREAM, IPPROTO_TCP) != 0) {
             printf("Could not resolve extra address : %s", extra_host);
@@ -517,7 +517,7 @@ int main(int argc, char **argv) {
     if (is_server) {
         rapido_add_address(session, (struct sockaddr *)&sa, salen);
         if (extra_salen > 0) {
-            printf("Added secondary address");
+            printf("Added secondary address\n");
             rapido_add_address(session, (struct sockaddr *)&extra_sa, extra_salen);
         }
         run_server(session, enable_http_server);
