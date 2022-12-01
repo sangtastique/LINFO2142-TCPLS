@@ -162,6 +162,7 @@ size_t handle_http_request(uint8_t *read_ptr, size_t read_len, struct st_http_se
 
 void run_server(rapido_session_t *session, bool enable_http_server) {
     bool closed = false;
+    int ret = 0;
     struct st_http_server_context http_ctx = {0};
     while (!closed) {
         rapido_run_network(session, RUN_NETWORK_TIMEOUT);
@@ -171,8 +172,16 @@ void run_server(rapido_session_t *session, bool enable_http_server) {
                 printf("Accepted connection\n");
                 if (!enable_http_server) {
                     rapido_stream_id_t stream = rapido_open_stream(session);
-                    rapido_attach_stream(session, stream, notification->connection_id);
-                    rapido_set_stream_producer(session, stream, stream_produce_random_data, NULL);
+                    printf("rapido_open_stream returned : %d\n", stream);
+                    
+                    ret = rapido_attach_stream(session, stream, notification->connection_id);
+                    if(ret != 0) {
+                        printf("rapido_attach_stream failed and returned : %d\n", ret);
+                    }
+                    ret = rapido_set_stream_producer(session, stream, stream_produce_random_data, NULL);
+                    if(ret != 0) {
+                        printf("rapido_set_stream_producer failed and returned : %d\n", ret);
+                    }
                 }
             } else if (notification->notification_type == rapido_stream_has_data) {
                 size_t read_len = UINT64_MAX;
@@ -331,7 +340,7 @@ void run_client(rapido_session_t *session, size_t data_to_receive, const char *g
     }
     uint64_t end_time = get_usec_time();
     printf("Received %lu bytes over %f seconds at %.02f Mbit/s\n", data_received, (end_time - start_time) / 1000000.0,
-           (data_received * 8.0) / (end_time - start_time)); // TODO : Why 0.8 ??
+           (data_received * 8.0) / (end_time - start_time));
     rapido_close_session(session, 0);
     rapido_close_connection(session, 0);
     if (extra_connection > 0) {
@@ -367,7 +376,7 @@ int main(int argc, char **argv) {
     size_t data_to_receive = 10000000;
     bool enable_http_server = false;
 
-    while ((ch = getopt(argc, argv, "c:k:l:n:q:s:g:r:y:h0")) != -1) {
+    while ((ch = getopt(argc, argv, "c:k:a:l:n:q:s:g:r:y:h0")) != -1) {
         switch (ch) {
         case 'c':
             if (cert_location != NULL) {
@@ -484,6 +493,7 @@ int main(int argc, char **argv) {
     socklen_t extra_salen;
     if(n_extra_host != 0) { // TODO : adapt for more than one extra host
         if (resolve_address((struct sockaddr *)&extra_sa, &extra_salen, extra_host, port, 0, SOCK_STREAM, IPPROTO_TCP) != 0) {
+            printf("Could not resolve extra address : %s", extra_host);
             extra_salen = 0;
         }
     }
@@ -507,6 +517,7 @@ int main(int argc, char **argv) {
     if (is_server) {
         rapido_add_address(session, (struct sockaddr *)&sa, salen);
         if (extra_salen > 0) {
+            printf("Added secondary address");
             rapido_add_address(session, (struct sockaddr *)&extra_sa, extra_salen);
         }
         run_server(session, enable_http_server);
