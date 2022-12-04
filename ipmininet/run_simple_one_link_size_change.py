@@ -28,8 +28,6 @@ try:
 
     h2ip = net["h2"].IP()
 
-    # net["h2"].cmd("rm measurements/simple_link_different_sizes_server_measurements.txt")
-    # net["h1"].cmd("rm measurements/simple_link_different_sizes_client_measurements.txt")
     cmd_server = "./rapido -c rsa/cert.pem -k rsa/key.pem {:s} 2142 >> measurements/simple_link_different_sizes_server_measurements.txt &".format(h2ip)
 
     for i in np.arange(size_from, size_to, size_step):
