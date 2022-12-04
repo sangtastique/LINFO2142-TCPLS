@@ -12,7 +12,7 @@ if __name__ == "__main__":
     transfert_size = 30
 
     ratio_start = 0.5
-    ratio_end_excluded = 0.6
+    ratio_end_excluded = 0.7
     ratio_step = 0.1
     ratios = np.arange(ratio_start, ratio_end_excluded, ratio_step)
     n_ratios = len(ratios)
@@ -21,8 +21,18 @@ if __name__ == "__main__":
     bw_handle = int(sum_bw * 2)
     n_iter = 2
 
-    print("handle bandwidth : {:.10f} Mbits/sec, total bandwidth of parallel links : {:.10f} Mbits/sec, considered rations : np.arange({:f}, {:f}, {:f}) iterations : {:d}".format(bw_handle, sum_bw, ratio_start, ratio_end_excluded, ratio_step, n_iter))
-    print("ratio iter goodput")
+    
+
+    filename = "measurements/spoon_double_ratiobw.txt"
+    original_stdout = sys.stdout 
+    with open(filename, 'w') as f:
+        sys.stdout = f 
+        print("handle bandwidth : {:.10f} Mbits/sec, total bandwidth of parallel links : {:.10f} Mbits/sec, considered rations : np.arange({:f}, {:f}, {:f}) iterations : {:d}".format(bw_handle, sum_bw, ratio_start, ratio_end_excluded, ratio_step, n_iter))
+        print("ratio iter total_transfert time goodput")
+        sys.stdout = original_stdout 
+
+    print("handle bandwidth : {:.10f} Mbits/sec, total bandwidth of parallel links : {:.10f} Mbits/sec, considered ratios : np.arange({:f}, {:f}, {:f}) iterations : {:d}".format(bw_handle, sum_bw, ratio_start, ratio_end_excluded, ratio_step, n_iter))
+    print("ratio iter total_transfert time goodput")
 
     for i in ratios:
 
@@ -58,14 +68,14 @@ if __name__ == "__main__":
             cmd_client = "./rapido -s {:d} -n localhost {:s} 2142".format(transfert_size, h2eth0)
 
             for j in range(0, n_iter):
-
+                time.sleep(1)
                 print("[iter "+str(j)+", ratio = "+str(i)+" top = "+str(bw_top)+", bot = "+str(bw_bot)+"] Launch rapido")
 
                 net["h2"].cmd(cmd_serv) 
 
                 time.sleep(1)
 
-                net["h1"].cmd("echo '{:.3f} {:d} '$({:s}) >> measurements/spoon_double_ratiobw_client.txt".format(i, j, cmd_client))
+                net["h1"].cmd("echo '{:.3f} {:d} '$({:s}) >> {:s}".format(i, j, cmd_client, filename))
 
             # IPCLI(net)
                 
