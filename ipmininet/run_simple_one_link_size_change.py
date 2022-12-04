@@ -4,24 +4,45 @@ from ipmininet.cli import IPCLI
 import time
 import os
 import sys
+import numpy as np
 
-net = IPNet(topo=SimpOneLinkTopo(), use_v6=False)
+bandwidth = 10
+n_iter = 10
+
+size_from = 2
+size_to = 20
+size_step = 2
+
+filename = "measurements/simple_link_different_sizes.txt"
+
+net = IPNet(topo=SimpOneLinkTopo(bw=bandwidth), use_v6=False)
 try:
     net.start()
 
-    net["h2"].cmd("rm measurements/simple_link_different_sizes_server_measurements.txt")
-    net["h1"].cmd("rm measurements/simple_link_different_sizes_client_measurements.txt")
-
     time.sleep(1)
 
-    for i in range(1, 21):
-        net["h2"].cmd("echo '["+str(i)+"MB]' >> measurements/simple_link_different_sizes_server_measurements.txt")
-        net["h1"].cmd("echo '["+str(i)+"MB]' >> measurements/simple_link_different_sizes_client_measurements.txt")
-        print("["+str(i)+"MB] Launch rapido server")
-        net["h2"].cmd("./rapido -c rsa/cert.pem -k rsa/key.pem "+ net["h2"].IP() +" 2142 >> measurements/simple_link_different_sizes_server_measurements.txt &")
-        time.sleep(1) #Wait the server to start
-        print("["+str(i)+"MB] Launch rapido client\n")
-        net["h1"].cmd("./rapido -s "+str(i)+" -n localhost "+ net["h2"].IP() +" 2142 >> measurements/simple_link_different_sizes_client_measurements.txt")
+    original_stdout = sys.stdout 
+    with open(filename, 'w') as f:
+        sys.stdout = f 
+        print("total bandwidth : {:.10f} Mbits/sec, iterations : {:d}, sizes : arange({:d}, {:d} ,{:d})".format(bandwidth, n_iter, size_from, size_to, size_step))
+        print("file_size[MB] iter total_transfert time goodput")
+        sys.stdout = original_stdout
+
+    h2ip = net["h2"].IP()
+
+    # net["h2"].cmd("rm measurements/simple_link_different_sizes_server_measurements.txt")
+    # net["h1"].cmd("rm measurements/simple_link_different_sizes_client_measurements.txt")
+    cmd_server = "./rapido -c rsa/cert.pem -k rsa/key.pem {:s} 2142 >> measurements/simple_link_different_sizes_server_measurements.txt &".format(h2ip)
+
+    for i in np.arange(size_from, size_to, size_step):
+        for j in range(0, n_iter):
+            time.sleep(1)
+            cmd_client = "echo '{:d} {:d} '$(./rapido -s {:d} -n localhost {:s} 2142) >> {:s}".format(i, j, i, h2ip, filename)
+            
+            print("["+str(i)+"MB] Launch rapido")
+            net["h2"].cmd(cmd_server)
+            time.sleep(1)
+            net["h1"].cmd(cmd_client)
         
     IPCLI(net)
     

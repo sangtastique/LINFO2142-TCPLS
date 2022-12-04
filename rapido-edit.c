@@ -292,6 +292,9 @@ void enqueue_get_request(rapido_session_t *session, rapido_stream_id_t stream, c
 
 void run_client(rapido_session_t *session, size_t data_to_receive, const char *get_path, size_t no_requests) {
     rapido_stream_id_t app_stream = rapido_open_stream(session);
+
+    int diff = 0, iter = 0;
+    
     if (get_path) {
         rapido_attach_stream(session, app_stream, 0);
         for (int i = 0; i < no_requests; i++) {
@@ -310,10 +313,13 @@ void run_client(rapido_session_t *session, size_t data_to_receive, const char *g
         while (session->pending_notifications.size > 0) {
             rapido_application_notification_t *notification = rapido_queue_pop(&session->pending_notifications);
             if (notification->notification_type == rapido_new_stream) {
-                printf("New stream from server\n");
+                // printf("New stream from server\n");
             } else if (!has_read && notification->notification_type == rapido_stream_has_data) {
                 size_t read_len = UINT64_MAX;
                 uint8_t *read_ptr = rapido_read_stream(session, notification->stream_id, &read_len);
+                
+                diff = data_received;
+                iter = 0;
                 while (read_len > 0) {
                     if (get_path) {
                         no_requests_received += handle_http_response(read_ptr, read_len, &http_ctx);
@@ -321,10 +327,12 @@ void run_client(rapido_session_t *session, size_t data_to_receive, const char *g
                     data_received += read_len;
                     read_len = UINT64_MAX;
                     read_ptr = rapido_read_stream(session, notification->stream_id, &read_len);
+                    iter++;
                 }
+                // printf("Read from stream %d : %d KB in %d iterations\n", notification->stream_id, (data_received - diff)/1000, iter);
                 has_read = true;
             } else if (!extra_connection && notification->notification_type == rapido_new_remote_address) {
-                printf("Creating a new connection to the secondary address advertised by the server\n");
+                // printf("Creating a new connection to the secondary address advertised by the server\n");
                 extra_connection = rapido_create_connection(session, 1, notification->address_id);
                 if (get_path) {
                     rapido_attach_stream(session, app_stream, extra_connection);
@@ -333,14 +341,15 @@ void run_client(rapido_session_t *session, size_t data_to_receive, const char *g
                     rapido_close_stream(session, app_stream);
                 }
             } else if (notification->notification_type == rapido_session_closed) {
-                printf("Session closed\n");
+                // printf("Session closed\n");
                 closed = true;
             }
         }
     }
     uint64_t end_time = get_usec_time();
-    printf("Received %lu bytes over %f seconds at %.02f Mbit/s\n", data_received, (end_time - start_time) / 1000000.0,
-           (data_received * 8.0) / (end_time - start_time));
+    // printf("Received %lu bytes over %f seconds at %.02f Mbit/s\n", data_received, (end_time - start_time) / 1000000.0,
+    //        (data_received * 8.0) / (end_time - start_time));
+    printf("%.04f\n",(data_received * 8.0) / (end_time - start_time));
     rapido_close_session(session, 0);
     rapido_close_connection(session, 0);
     if (extra_connection > 0) {
