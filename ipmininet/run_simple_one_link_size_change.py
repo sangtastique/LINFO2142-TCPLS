@@ -1,5 +1,6 @@
 from ipmininet.ipnet import IPNet
 from topologies.simple_one_link_topo import SimpOneLinkTopo
+from ipmininet.cli import IPCLI
 import time
 import os
 import sys
@@ -17,6 +18,7 @@ filename = "measurements/simple_link_different_sizes.txt"
 net = IPNet(topo=SimpOneLinkTopo(bw=bandwidth), use_v6=False)
 try:
     net.start()
+
     time.sleep(1)
 
     original_stdout = sys.stdout 
@@ -40,6 +42,7 @@ try:
             time.sleep(1)
             net["h1"].cmd(cmd_client)
         
+    IPCLI(net)
     
 finally:
     net.stop()
