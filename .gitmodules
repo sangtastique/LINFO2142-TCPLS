@@ -1,0 +1,3 @@
+[submodule "deps/rapido"]
+	path = deps/rapido
+	url = https://github.com/mpiraux/rapido
