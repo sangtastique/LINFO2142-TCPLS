@@ -4,12 +4,26 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib import rc
 
-rc('text', usetex=False)
+# Use LaTeX rendering (requires installing MiKTeX on windpws + ghostscript)
+# Makes the rendering slower tho
+plt.rc('text', usetex=True)
+# Use LaTeX's default 'Computer Modern' font for labels as well
+plt.rc('font', family='serif')
 
 # data = np.genfromtxt("../measurements/simple_tour_s1.txt",delimiter=' ', skip_header=2, dtype=float)
 data = pd.read_csv("../measurements/simple_file_tour_concat.txt",sep=' ', skiprows=1)
 
-mean_goodput = data.groupby('file_size[MB]')['goodput'].median()
+group = data.groupby('file_size[MB]')
+
+mean_goodput = group['goodput'].median()
+
+to_box = group['goodput'].apply(np.hstack).to_numpy()
+
+# group.boxplot( subplots=False, column="goodput")
+
+# plt.xticks(np.array(data.groupby('file_size[MB]').groups.keys()))
+
+# plt.show()
 
 # print(data.head())
 # print(data.groupby('file_size[MB]')['goodput'].mean())
@@ -30,13 +44,22 @@ mean_goodput = data.groupby('file_size[MB]')['goodput'].median()
 fig = plt.figure(figsize=(8,4.5))
 ax = fig.add_subplot(1,1,1)
 
-plt.ylabel(r"$\mathrm{Goodput} [Mbits/sec]$",fontsize=20)
-
-plt.xlabel(r"$\mathrm{Transfert size} [MBytes]$",fontsize=20)
+# plt.ylabel(r"$\mathrm{Goodput} [Mbits/sec]$",fontsize=20)
+# plt.xlabel(r"$\mathrm{Transfert size} [MBytes]$",fontsize=20)
+plt.ylabel("Goodput [Mb/sec]",fontsize=16)
+plt.xlabel("Transfer size [MB]",fontsize=16)
 plt.xticks(mean_goodput.index)
+plt.yticks(np.arange(1,11,1))
+plt.grid(True, color='gray', alpha=0.2, linestyle='-', linewidth=0.3)
 
-plt.scatter(data["file_size[MB]"],data["goodput"])
-plt.scatter(mean_goodput.index, mean_goodput.values)
-plt.plot(mean_goodput.index,mean_goodput.values, "-k")
-# plt.tight_layout()
+max_link = plt.axhline(y = 10, color = 'r', linestyle = '--', linewidth=0.5, label="Max. link bandwidth")
+bp = plt.boxplot(to_box, positions=mean_goodput.index, widths=0.35, sym="+", medianprops=dict(linewidth=1.3, color="g"))
+
+plt.legend([max_link, bp['medians'][0]], ["Max. link bandwidth", "Medians"], fancybox=False)
+
+# plt.scatter(data["file_size[MB]"],data["goodput"])
+# plt.scatter(mean_goodput.index, mean_goodput.values)
+# plt.plot(mean_goodput.index,mean_goodput.values, "-k")
+fig.tight_layout()
+
 plt.show()
