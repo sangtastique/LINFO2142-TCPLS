@@ -28,8 +28,10 @@ class SpoonDouble(IPTopo):
 
         h1r1 = self.addLink(h1, r1, bw=bw_handle)
         # h1r1[h1].addParams(ip="10.0.0.1")
-        h2r1_1 = self.addLink(h2, r1, bw=bw_parallel[0])
-        h2r1_2 = self.addLink(h2, r1, bw=bw_parallel[1])
+        if(bw_parallel[0] != 0):
+            h2r1_1 = self.addLink(h2, r1, bw=bw_parallel[0])
+        if(bw_parallel[1] != 0):
+            h2r1_2 = self.addLink(h2, r1, bw=bw_parallel[1])
 
 
     # def build(self, *args, **kwargs):
