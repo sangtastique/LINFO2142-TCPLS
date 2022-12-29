@@ -132,7 +132,7 @@ dmypy.json
 # /rapido
 
 # # Rapido executable
-# **/rapido
+rapidot_edit/rapido-edit
 
 # Iperf versions
 /iperf-3.9
