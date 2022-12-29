@@ -67,8 +67,6 @@ if __name__ == "__main__":
             # ./rapido -c rsa/cert.pem -k rsa/key.pem -a 192.168.2.1 h2 2142
             # ./rapido -s 40 -n localhost h2 2142
             cmd_client = "./rapido -s {:d} -n localhost {:s} 2142".format(transfert_size, h2eth0)
-            print("Waiting 15 sec for switches to boot")
-            time.sleep(25)
 
             for j in range(0, n_iter):
                 time.sleep(1)
