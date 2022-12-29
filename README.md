@@ -21,7 +21,7 @@ LINFO2142-TCPLS
 
 ## Installation
 
-All measurements happen inside the vagrant VM provided in [IPMininet's documentation](https://ipmininet.readthedocs.io/en/latest/install.html), so the first step is to download and run this VM. Clone this repo inside it or in a shared folder.
+All measurements happen inside the vagrant VM provided in [IPMininet's documentation](https://ipmininet.readthedocs.io/en/latest/install.html), so the first step is to download and run this VM. Clone this repository inside it or in a shared folder.
 
 ### Building rapido
 
