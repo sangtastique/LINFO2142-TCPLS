@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Get absolute path
 SCRIPT=$(readlink -f "$0")
