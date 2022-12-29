@@ -25,9 +25,21 @@ if __name__ == "__main__":
     bw_handle = int((bw_bot+bw_top) * 2)
     n_iter = 2
 
-    filename = "measurements/spoon_double_ratiodelay.txt"
+    filename = "spoon_double_ratiodelay.txt"
+
+    script_path = os.path.realpath(os.path.dirname(__file__))
+    root_path = os.path.dirname(os.path.dirname(script_path))
+    rapido_path = os.path.join(root_path, "rapido_edit", "rapido-edit")
+    measurements_path = os.path.join(os.path.dirname(script_path), "measurements")
+
+    certif_path = os.path.join(script_path, "rsa", "cert.pem")
+    key_path = os.path.join(script_path, "rsa", "key.pem")
+
+    client_file = os.path.join(measurements_path, filename)
+    server_file = os.path.join(measurements_path, "server_{:s}".format(filename))
+
     original_stdout = sys.stdout 
-    with open(filename, 'w') as f:
+    with open(client_file, 'w') as f:
         sys.stdout = f 
         print("Transfert size : {:f}, handle bandwidth : {:.10f} Mbits/sec, bandwidth of top link : {:.10f} Mbits/sec, bandwidth of bot link : {:.10f} Mbits/sec, handle delay : {:f} ms, top delay : {:f} ms, considered bot delay ratios relative to top delay : np.arange({:f}, {:f}, {:f}) iterations : {:d}".format(transfert_size, bw_handle, bw_top, bw_bot, handle_delay, top_delay, coef_bot_delay_start, coef_bot_delay_end_excluded, coef_bot_delay_step, n_iter))
         print("ratio iter total_transfert time goodput")
@@ -63,10 +75,9 @@ if __name__ == "__main__":
             net["h2"].cmd(cmd_route_add)
             net["h2"].cmd(cmd_route_default)
 
-            cmd_serv = "./rapido -c rsa/cert.pem -k rsa/key.pem -a {:s} {:s} 2142 >> measurements/spoon_double_ratiodelay_server.txt &".format(h2eth1, h2eth0)
-            # ./rapido -c rsa/cert.pem -k rsa/key.pem -a 192.168.2.1 h2 2142
-            # ./rapido -s 40 -n localhost h2 2142
-            cmd_client = "./rapido -s {:d} -n localhost {:s} 2142".format(transfert_size, h2eth0)
+            cmd_serv = "{:s} -c {:s} -k {:s} -a {:s} {:s} 2142 >> {:s} &".format(rapido_path, certif_path, key_path, h2eth1, h2eth0, server_file)
+
+            cmd_client = "{:s} -s {:d} -n localhost {:s} 2142".format(rapido_path, transfert_size, h2eth0)
 
             for j in range(0, n_iter):
                 time.sleep(1)
@@ -76,7 +87,7 @@ if __name__ == "__main__":
 
                 time.sleep(1)
 
-                net["h1"].cmd("echo '{:.3f} {:d} '$({:s}) >> {:s}".format(i, j, cmd_client, filename))
+                net["h1"].cmd("echo '{:.3f} {:d} '$({:s}) >> {:s}".format(i, j, cmd_client, client_file))
 
             # IPCLI(net)
                 

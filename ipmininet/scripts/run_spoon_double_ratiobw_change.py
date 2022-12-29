@@ -21,11 +21,21 @@ if __name__ == "__main__":
     bw_handle = int(sum_bw * 1.1)
     n_iter = 15
 
-    
+    filename = "spoon_double_ratiobw.txt"
 
-    filename = "measurements/spoon_double_ratiobw.txt"
+    script_path = os.path.realpath(os.path.dirname(__file__))
+    root_path = os.path.dirname(os.path.dirname(script_path))
+    rapido_path = os.path.join(root_path, "rapido_edit", "rapido-edit")
+    measurements_path = os.path.join(os.path.dirname(script_path), "measurements")
+
+    certif_path = os.path.join(script_path, "rsa", "cert.pem")
+    key_path = os.path.join(script_path, "rsa", "key.pem")
+
+    client_file = os.path.join(measurements_path, filename)
+    server_file = os.path.join(measurements_path, "server_{:s}".format(filename))
+
     original_stdout = sys.stdout 
-    with open(filename, 'w') as f:
+    with open(client_file, 'w') as f:
         sys.stdout = f 
         print("handle bandwidth : {:.10f} Mbits/sec, total bandwidth of parallel links : {:.10f} Mbits/sec, considered rations : np.arange({:f}, {:f}, {:f}) iterations : {:d}".format(bw_handle, sum_bw, ratio_start, ratio_end_excluded, ratio_step, n_iter))
         print("ratio iter total_transfert time goodput")
@@ -62,15 +72,14 @@ if __name__ == "__main__":
                 net["h2"].cmd(cmd_route_add)
                 net["h2"].cmd(cmd_route_default)
 
-                cmd_serv = "./rapido -c rsa/cert.pem -k rsa/key.pem -a {:s} {:s} 2142 >> measurements/spoon_double_ratiobw_server.txt &".format(h2eth1, h2eth0)
+                cmd_serv = "{:s} -c {:s} -k {:s} -a {:s} {:s} 2142 >> {:s} &".format(rapido_path, certif_path, key_path, h2eth1, h2eth0, server_file)
                 # ./rapido -c rsa/cert.pem -k rsa/key.pem -a 192.168.2.1 h2 2142
                 # ./rapido -s 40 -n localhost h2 2142
-                cmd_client = "./rapido -s {:d} -n localhost {:s} 2142".format(transfert_size, h2eth0)
+                cmd_client = "{:s} -s {:d} -n localhost {:s} 2142".format(rapido_path, transfert_size, h2eth0)
             else:
                 # There's only one link !!
                 cmd_serv = "./rapido -c rsa/cert.pem -k rsa/key.pem {:s} 2142 >> measurements/spoon_double_ratiobw_server.txt &".format( h2eth0)
-                # ./rapido -c rsa/cert.pem -k rsa/key.pem -a 192.168.2.1 h2 2142
-                # ./rapido -s 40 -n localhost h2 2142
+
                 cmd_client = "./rapido -s {:d} -n localhost {:s} 2142".format(transfert_size, h2eth0)
 
             for j in range(0, n_iter):
@@ -81,7 +90,7 @@ if __name__ == "__main__":
 
                 time.sleep(1)
 
-                net["h1"].cmd("echo '{:.3f} {:d} '$({:s}) >> {:s}".format(i, j, cmd_client, filename))
+                net["h1"].cmd("echo '{:.3f} {:d} '$({:s}) >> {:s}".format(i, j, cmd_client, client_file))
 
             # IPCLI(net)
                 

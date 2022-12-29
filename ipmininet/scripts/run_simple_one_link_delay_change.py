@@ -13,10 +13,21 @@ delay_from = 5
 delay_to = 100
 delay_step = 15
 
-filename = "measurements/simple_link_different_delay.txt"
+filename = "simple_link_different_delay.txt"
+
+script_path = os.path.realpath(os.path.dirname(__file__))
+root_path = os.path.dirname(os.path.dirname(script_path))
+rapido_path = os.path.join(root_path, "rapido_edit", "rapido-edit")
+measurements_path = os.path.join(os.path.dirname(script_path), "measurements")
+
+certif_path = os.path.join(script_path, "rsa", "cert.pem")
+key_path = os.path.join(script_path, "rsa", "key.pem")
+
+client_file = os.path.join(measurements_path, filename)
+server_file = os.path.join(measurements_path, "server_{:s}".format(filename))
 
 original_stdout = sys.stdout 
-with open(filename, 'w') as f:
+with open(client_file, 'w') as f:
     sys.stdout = f 
     print("transfert size : {:.10f} MB, iterations : {:d}, delays : arange({:d}, {:d} ,{:d}), bw : {:d}".format(transfert_size, n_iter, delay_from, delay_to, delay_step, bw))
     print("delay bw iter total_transfert time goodput")
@@ -33,11 +44,11 @@ for delay in np.arange(delay_from, delay_to, delay_step):
 
         h2ip = net["h2"].IP()
 
-        cmd_server = "./rapido -c rsa/cert.pem -k rsa/key.pem {:s} 2142 >> measurements/simple_link_different_bw_server_measurements.txt &".format(h2ip)
+        cmd_server = "{:s} -c {:s} -k {:s} {:s} 2142 >> {:s} &".format(rapido_path, certif_path, key_path, h2ip, server_file)
 
         for j in range(0, n_iter):
             time.sleep(1)
-            cmd_client = "echo '{:d} {:d} {:d} '$(./rapido -s {:d} -n localhost {:s} 2142) >> {:s}".format(delay, bw, j, transfert_size, h2ip, filename)
+            cmd_client = "echo '{:d} {:d} {:d} '$({:s} -s {:d} -n localhost {:s} 2142) >> {:s}".format(delay, bw, j, rapido_path, transfert_size, h2ip, client_file)
             
             print("["+str(delay)+"ms] Launch rapido")
             net["h2"].cmd(cmd_server)
