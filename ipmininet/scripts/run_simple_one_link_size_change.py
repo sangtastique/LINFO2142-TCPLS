@@ -42,7 +42,7 @@ try:
             time.sleep(1)
             net["h1"].cmd(cmd_client)
         
-    IPCLI(net)
+    # IPCLI(net)
     
 finally:
     net.stop()
