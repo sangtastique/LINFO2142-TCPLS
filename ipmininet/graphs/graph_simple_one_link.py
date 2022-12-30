@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib import rc
+import os
 
 # Use LaTeX rendering (requires installing MiKTeX on windpws + ghostscript)
 # Makes the rendering slower tho
@@ -10,8 +11,10 @@ plt.rc('text', usetex=True)
 # Use LaTeX's default 'Computer Modern' font for labels as well
 plt.rc('font', family='serif')
 
-# data = np.genfromtxt("../measurements/simple_tour_s1.txt",delimiter=' ', skip_header=2, dtype=float)
-data = pd.read_csv("../measurements/simple_file_tour_concat.txt",sep=' ', skiprows=1)
+filename = "simple_file_tour_concat.txt"
+
+measurements_path = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename)
+data = pd.read_csv(measurements_path, sep=' ', skiprows=1)
 
 group = data.groupby('file_size[MB]')
 
