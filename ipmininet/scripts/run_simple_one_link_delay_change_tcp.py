@@ -6,17 +6,19 @@ import os
 import sys
 import numpy as np
 
-n_iter = 10
+n_iter = 30
 transfert_size = 10
-bw_from = 2
-bw_to = 20
-bw_step = 2
+bw = 10
+delay_from = 5
+delay_to = 100
+delay_step = 15
 
-filename = "simple_link_different_bw_tcp.txt"
+filename = "simple_link_different_delay_tcp.txt"
 
 script_path = os.path.realpath(os.path.dirname(__file__))
 root_path = os.path.dirname(os.path.dirname(script_path))
 measurements_path = os.path.join(os.path.dirname(script_path), "measurements")
+
 
 client_file = os.path.join(measurements_path, filename)
 server_file = os.path.join(measurements_path, "server_{:s}".format(filename))
@@ -24,13 +26,13 @@ server_file = os.path.join(measurements_path, "server_{:s}".format(filename))
 original_stdout = sys.stdout 
 with open(client_file, 'w') as f:
     sys.stdout = f 
-    print("transfert size : {:.10f} MB, iterations : {:d}, max bandwidths : arange({:d}, {:d} ,{:d})".format(transfert_size, n_iter, bw_from, bw_to, bw_step))
-    print("max_bw iter total_transfert time goodput")
+    print("transfert size : {:.10f} MB, iterations : {:d}, delays : arange({:d}, {:d} ,{:d}), bw : {:d}".format(transfert_size, n_iter, delay_from, delay_to, delay_step, bw))
+    print("delay bw iter total_transfert time goodput")
     sys.stdout = original_stdout
 
-for bwdth in np.arange(bw_from, bw_to, bw_step):
+for delay in np.arange(delay_from, delay_to, delay_step):
     time.sleep(1)
-    net = IPNet(topo=SimpOneLinkTopo(bw=bwdth), use_v6=False)
+    net = IPNet(topo=SimpOneLinkTopo(bw=bw, delay=delay), use_v6=False)
 
     try:
         net.start()
@@ -44,12 +46,14 @@ for bwdth in np.arange(bw_from, bw_to, bw_step):
 
         for j in range(0, n_iter):
             time.sleep(1)
-            cmd_client = "echo '{:d} {:d} '$(iperf3 -n {:d}M -c {:s} -f 'm' -R | tail -n 3 | grep 'receiver' | awk '{{ print $3,$5,$7 }}' | cut -d '-' --complement -f1) >> {:s}".format(bwdth, j, transfert_size, h2ip, client_file)
-
-            print("["+str(bwdth)+"MB] Launch rapido")
+            cmd_client = "echo '{:d} {:d} {:d} '$(iperf3 -n {:d}M -c {:s} -f 'm' -R | tail -n 3 | grep 'receiver' | awk '{{ print $3,$5,$7 }}' | cut -d '-' --complement -f1) >> {:s}".format(delay, bw, j, transfert_size, h2ip, client_file)
+      
+            print("["+str(delay)+"ms] Launch rapido")
+            net["h2"].cmd(cmd_server)
             time.sleep(1)
             net["h1"].cmd(cmd_client)
             
+        # IPCLI(net)
         
     finally:
         net.stop()
