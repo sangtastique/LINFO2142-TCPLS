@@ -10,11 +10,15 @@ class SimpOneLinkTopo(IPTopo):
         H1 ---- R ---- H2
 
     """
-    def __init__( self, bw=10, delay=2, *args, **kwargs):
+    def __init__( self, bw=10, delay=None, *args, **kwargs):
         self.switch_count = 0
         super().__init__(*args, **kwargs)
 
-        params = {"bw":bw, "delay":"{:d}ms".format(delay)}
+        if(delay==None):
+            params = {"bw":bw}
+        else:
+            params = {"bw":bw, "delay":"{:d}ms".format(delay)}
+
         r = self.addRouter("r1")
 
         h1 = self.addHost("h1")
