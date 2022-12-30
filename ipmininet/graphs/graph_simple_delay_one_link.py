@@ -10,15 +10,14 @@ plt.rc('text', usetex=True)
 # Use LaTeX's default 'Computer Modern' font for labels as well
 plt.rc('font', family='serif')
 
-filename = "simple_bw_tour.txt"
-# filename = "simple_link_different_bw_tour_2.txt"
+filename = "simple_link_different_delay_tour.txt"
 
 measurements_path = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename)
 data = pd.read_csv(measurements_path,sep=' ', skiprows=1)
 
-val_max_bw = 101
-data['goodput'] = data['goodput']/data['max_bw']
-group = data.loc[data["max_bw"] < val_max_bw].groupby('max_bw')
+val_max_delay = 200
+data['goodput'] = data['goodput']/data['bw']
+group = data.loc[data["delay"] <= val_max_delay].groupby('delay')
 
 mean_goodput = group['goodput'].median()
 
@@ -52,9 +51,9 @@ ax = fig.add_subplot(1,1,1)
 # plt.ylabel(r"$\mathrm{Goodput} [Mbits/sec]$",fontsize=20)
 # plt.xlabel(r"$\mathrm{Transfert size} [MBytes]$",fontsize=20)
 plt.ylabel("Link utilization [/]",fontsize=16)
-plt.xlabel("Total available bandwidth [Mb/sec]",fontsize=16)
+plt.xlabel("Link delay [ms]",fontsize=16)
 plt.xticks(mean_goodput.index)
-plt.xlim(3, val_max_bw + 3)
+plt.xlim(3, val_max_delay + 3)
 # plt.yticks(np.arange(1,11,1))
 plt.grid(True, color='gray', alpha=0.2, linestyle='-', linewidth=0.3)
 
