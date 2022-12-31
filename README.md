@@ -39,6 +39,7 @@ This script will update rapido's git submodule, compile the binary and move it t
 
 ## Running a script
 
+Before running the python scripts make sure to install the `numpy` package : `sudo pip3 install numpy`
 Finally you can run our experiments on you own machine :
 ```bash
 sudo python3 ipmininet/scripts/run_[end of script name here]
