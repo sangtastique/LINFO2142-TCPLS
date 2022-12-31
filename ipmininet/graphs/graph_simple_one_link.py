@@ -11,7 +11,7 @@ plt.rc('text', usetex=True)
 # Use LaTeX's default 'Computer Modern' font for labels as well
 plt.rc('font', family='serif')
 
-filename = "simple_file_tour_concat.txt"
+filename = "simple_link_different_sizes_tour_concat.txt"
 filename_tcp = "simple_link_different_sizes_tcp_tour.txt"
 
 measurements_path = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename)

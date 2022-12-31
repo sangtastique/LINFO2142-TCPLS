@@ -11,7 +11,7 @@ plt.rc('text', usetex=True)
 # Use LaTeX's default 'Computer Modern' font for labels as well
 plt.rc('font', family='serif')
 
-filename = "spoon_double_ratio_tour_s1.txt"
+filename = "spoon_double_ratiobw_tour.txt"
 
 measurements_path = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename)
 data = pd.read_csv(measurements_path, sep=' ', skiprows=1)

@@ -10,7 +10,7 @@ plt.rc('text', usetex=True)
 # Use LaTeX's default 'Computer Modern' font for labels as well
 plt.rc('font', family='serif')
 
-filename = "simple_bw_tour.txt"
+filename = "simple_link_different_bw_tour.txt"
 # filename = "simple_link_different_bw_tour_2.txt"
 filename_tcp = "simple_link_different_bw_tcp_tour.txt"
 
