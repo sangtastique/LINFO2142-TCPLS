@@ -11,11 +11,13 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 filename = "simple_link_different_delay_tour.txt"
+filename_tcp = "simple_link_different_delay_tcp_tour.txt"
+
+val_max_delay = 410
 
 measurements_path = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename)
 data = pd.read_csv(measurements_path,sep=' ', skiprows=1)
 
-val_max_delay = 410
 data['goodput'] = data['goodput']/data['bw']
 data['delay'] = data['delay'] * 2
 group = data.loc[data["delay"] <= val_max_delay].groupby('delay')
@@ -24,23 +26,38 @@ mean_goodput = group['goodput'].median()
 
 to_box = group['goodput'].apply(np.hstack).to_numpy()
 
+measurements_path_tcp = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename_tcp)
+data_tcp = pd.read_csv(measurements_path_tcp, sep=' ', skiprows=1)
+
+data_tcp['goodput'] = data_tcp['goodput']/data_tcp['bw']
+data_tcp['delay'] = data_tcp['delay'] * 2
+group_tcp = data_tcp.loc[data_tcp["delay"] <= val_max_delay].groupby('delay')
+
+mean_goodput_tcp = group_tcp['goodput'].median()
+
+to_box_tcp = group_tcp['goodput'].apply(np.hstack).to_numpy()
+
 fig = plt.figure(figsize=(8,4.5))
 ax = fig.add_subplot(1,1,1)
 
 plt.ylabel("Link utilization [/]",fontsize=16)
 plt.xlabel("Total link delay [ms]",fontsize=16)
-plt.xticks(mean_goodput.index)
-plt.xlim(3, val_max_delay + 3)
 plt.grid(True, color='gray', alpha=0.2, linestyle='-', linewidth=0.3)
 
 ax.tick_params(labelsize=13)
 
-plt.title("TCPLS' goodput link utilization vs. link delay on simple topology", fontsize=18)
+plt.title("Goodput link utilization vs. link delay on simple topology", fontsize=18)
 
 max_link = plt.axhline(y = 1, color = 'grey', linestyle = '--', linewidth=0.5, label="Max. link bandwidth")
 
-bp = plt.boxplot(to_box, positions=mean_goodput.index, widths=6, sym="+", medianprops=dict(linewidth=1.3, color="r"))
+bp = plt.boxplot(to_box, positions=mean_goodput.index - 4, widths=6, sym="+", patch_artist=True, boxprops=dict(color="k", facecolor="white"),medianprops=dict(linewidth=1.3, color="r"))
 
-plt.legend([bp['medians'][0], max_link], [ "Medians", "Max. utilization"], fancybox=False, framealpha=0.5)
+bp_tcp = plt.boxplot(to_box_tcp, positions=mean_goodput_tcp.index + 4, widths=6, sym="x", patch_artist=True, boxprops=dict(color="k", facecolor=[27/255,166/255,29/255,0.5]), medianprops=dict(linewidth=1.3, color="orange"))
+
+
+plt.xticks(mean_goodput.index, mean_goodput.index)
+plt.xlim(1, val_max_delay + 8)
+plt.legend([bp['boxes'][0], bp_tcp['boxes'][0], bp['medians'][0], max_link], [ r"TCPLS (\small\texttt{rapido})", r"TCP (\small\texttt{iperf3})", "Medians", "Max. link utilization"], ncol=2, fancybox=False, framealpha=0.5)
 fig.tight_layout()
+plt.subplots_adjust(top=0.935, bottom=0.127, left=0.079, right=0.996)
 plt.show()

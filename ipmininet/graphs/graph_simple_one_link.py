@@ -12,6 +12,7 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 filename = "simple_file_tour_concat.txt"
+filename_tcp = "simple_link_different_sizes_tcp_tour.txt"
 
 measurements_path = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename)
 data = pd.read_csv(measurements_path, sep=' ', skiprows=1)
@@ -22,21 +23,34 @@ mean_goodput = group['goodput'].median()
 
 to_box = group['goodput'].apply(np.hstack).to_numpy()
 
+measurements_path_tcp = os.path.join(os.path.dirname(os.path.realpath(os.path.dirname(__file__))), "measurements", filename_tcp)
+data_tcp = pd.read_csv(measurements_path_tcp, sep=' ', skiprows=1)
+data_tcp['goodput'] = data_tcp['goodput']/10
+group_tcp = data_tcp.groupby('file_size[MB]')
+
+mean_goodput_tcp = group_tcp['goodput'].median()
+
+to_box_tcp = group_tcp['goodput'].apply(np.hstack).to_numpy()
+
 fig = plt.figure(figsize=(8,4.5))
 ax = fig.add_subplot(1,1,1)
 
 plt.ylabel("Link utilization [/]",fontsize=16)
 plt.xlabel("Transfer size [MB]",fontsize=16)
-plt.xticks(mean_goodput.index)
+
 plt.grid(True, color='gray', alpha=0.2, linestyle='-', linewidth=0.3)
 
 ax.tick_params(labelsize=13)
-plt.title("TCPLS' goodput link utilization vs. transfert size on simple topology", fontsize=18)
+plt.title("Goodput link utilization vs. transfer size on simple topology", fontsize=18)
 
 max_link = plt.axhline(y = 1, color = 'gray', linestyle = '--', linewidth=0.5, label="Max. link utilization")
-bp = plt.boxplot(to_box, positions=mean_goodput.index, widths=0.35, sym="+", medianprops=dict(linewidth=1.3, color="r"))
+bp = plt.boxplot(to_box, positions=mean_goodput.index - 0.25, widths=0.35, sym="+", patch_artist=True, boxprops=dict(color="k", facecolor="white"),medianprops=dict(linewidth=1.3, color="r"))
 
-plt.legend([ bp['medians'][0], max_link], [ "Medians", "Max. link utilization"], fancybox=False, framealpha=0.5)
+bp_tcp = plt.boxplot(to_box_tcp, positions=mean_goodput.index + 0.25, widths=0.35, sym="x", patch_artist=True, boxprops=dict(color="k", facecolor=[27/255,166/255,29/255,0.5]), medianprops=dict(linewidth=1.3, color="orange"))
+
+plt.yticks(np.arange(0.2,1.01,0.1))
+plt.xticks(mean_goodput.index, mean_goodput.index)
+plt.legend([bp['boxes'][0], bp_tcp['boxes'][0], bp['medians'][0], max_link], [ r"TCPLS (\small\texttt{rapido})", r"TCP (\small\texttt{iperf3})", "Medians", "Max. link utilization"], ncol=2, fancybox=False, framealpha=0.5)
 fig.tight_layout()
-
+plt.subplots_adjust(top=0.93, bottom=0.132, left=0.079, right=0.996)
 plt.show()

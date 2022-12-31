@@ -34,7 +34,7 @@ fig = plt.figure(figsize=(8,4.5))
 ax = fig.add_subplot(1,1,1)
 
 plt.ylabel("Combined utilization [/]",fontsize=16)
-plt.xlabel(r"Link bandwidth distribution between both paths [primary \% / secondary \%]",fontsize=16)
+plt.xlabel(r"Link bandwidth allocation between both paths [primary \%/ secondary \%]",fontsize=16)
 
 plt.grid(True, color='gray', alpha=0.2, linestyle='-', linewidth=0.3)
 
@@ -44,13 +44,14 @@ bp = plt.boxplot(to_box2, positions=mean_goodput.index, widths=0.05, sym="+", me
 
 scatt = plt.scatter(mean_goodput.index, np.maximum(mean_goodput.index.to_numpy(),1 - mean_goodput.index.to_numpy()), marker="^", color="g")
 
-plt.xlim(-0.1, 1.1)
+plt.xlim(-0.05, 1.05)
 ax.tick_params(labelsize=13)
 plt.xticks(mean_goodput.index, labels=['0/100', '10/90', '20/80', '30/70', '40/60', '50/50', '60/40', '70/30', '80/20', '90/10', '100/0'], rotation=25)
 
-plt.title("TCPLS' goodput combined link utilization vs. bandwidth distribution\n over both paths on spoon topology", fontsize=18)
+plt.title("TCPLS' goodput combined link utilization vs. bandwidth allocation\nover both paths on spoon topology", fontsize=18)
 
 plt.legend([bp['medians'][0], max_link, scatt], [ "Medians", "Max. utilization", "Max. single path utilization"], fancybox=False, framealpha=0.5)
 
 fig.tight_layout()
+plt.subplots_adjust(top=0.873, bottom=0.174, left=0.079, right=0.996)
 plt.show()
