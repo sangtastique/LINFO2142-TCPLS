@@ -133,6 +133,7 @@ dmypy.json
 
 # # Rapido executable
 rapidot_edit/rapido-edit
+ignored
 
 # Iperf versions
 /iperf-3.9

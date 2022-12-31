@@ -1,8 +1,0 @@
-New stream from server
-Received 2091472 bytes over 2.180134 seconds at 7.67 Mbit/s
-New stream from server
-Received 10605984 bytes over 9.482643 seconds at 8.95 Mbit/s
-New stream from server
-Received 101421963 bytes over 93.159481 seconds at 8.71 Mbit/s
-New stream from server
-Received 1000840971 bytes over 993.623280 seconds at 8.06 Mbit/s
