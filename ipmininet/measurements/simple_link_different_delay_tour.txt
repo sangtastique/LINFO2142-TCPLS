@@ -1,4 +1,4 @@
-transfert size : 10.0000000000 MB, iterations : 30, delays : arange(5, 100 ,15), bw : 5
+transfert size : 10.0000000000 MB, iterations : 30, delays : arange(5, 201 ,15), bw : 5
 delay bw iter total_transfert time goodput
 5 5 0 10445154 19.088234 4.3776
 5 5 1 10446562 21.544152 3.8791
