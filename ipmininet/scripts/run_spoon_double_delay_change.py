@@ -11,8 +11,8 @@ if __name__ == "__main__":
 
     transfert_size = 10
 
-    handle_delay = 10
-    top_delay = 10
+    handle_delay = 35
+    top_delay = 35
     coef_bot_delay_start = 0.2
     coef_bot_delay_end_excluded = 3.1
     coef_bot_delay_step = 0.2
@@ -23,9 +23,9 @@ if __name__ == "__main__":
     bw_top = 5
     bw_bot = 5
     bw_handle = int((bw_bot+bw_top) * 2)
-    n_iter = 2
+    n_iter = 30
 
-    filename = "spoon_double_ratiodelay.txt"
+    filename = "spoon_double_ratiodelay_topchange.txt"
 
     script_path = os.path.realpath(os.path.dirname(__file__))
     root_path = os.path.dirname(os.path.dirname(script_path))
@@ -50,9 +50,9 @@ if __name__ == "__main__":
 
     for i in ratios:
 
-        bot_delay = i*top_delay
+        bot_delay = int(i*top_delay)
 
-        net = IPNet(topo=SpoonDouble(2, bw_handle, [bw_top, bw_bot], delay_handle=handle_delay, delay_parallel=[top_delay, bot_delay]), use_v6=False)
+        net = IPNet(topo=SpoonDouble(2, bw_handle, [bw_top, bw_bot], delay_handle=handle_delay, delay_parallel=[bot_delay, top_delay]), use_v6=False)
         try:
             net.start()
             time.sleep(1)

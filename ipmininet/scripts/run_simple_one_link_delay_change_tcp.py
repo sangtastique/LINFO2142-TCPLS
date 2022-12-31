@@ -8,9 +8,9 @@ import numpy as np
 
 n_iter = 30
 transfert_size = 10
-bw = 10
+bw = 5
 delay_from = 5
-delay_to = 100
+delay_to = 201
 delay_step = 15
 
 filename = "simple_link_different_delay_tcp.txt"
@@ -27,7 +27,7 @@ original_stdout = sys.stdout
 with open(client_file, 'w') as f:
     sys.stdout = f 
     print("transfert size : {:.10f} MB, iterations : {:d}, delays : arange({:d}, {:d} ,{:d}), bw : {:d}".format(transfert_size, n_iter, delay_from, delay_to, delay_step, bw))
-    print("delay bw iter total_transfert time goodput")
+    print("delay bw iter time total_transfert goodput")
     sys.stdout = original_stdout
 
 for delay in np.arange(delay_from, delay_to, delay_step):
@@ -40,18 +40,22 @@ for delay in np.arange(delay_from, delay_to, delay_step):
         time.sleep(1)
 
         h2ip = net["h2"].IP()
+        h1ip = net["h1"].IP()
 
-        cmd_server = "iperf3 -s &"
-        net["h2"].cmd(cmd_server)
+        cmd_server = "iperf3 -s -1 &"
+        
 
         for j in range(0, n_iter):
             time.sleep(1)
-            cmd_client = "echo '{:d} {:d} {:d} '$(iperf3 -n {:d}M -c {:s} -f 'm' -R | tail -n 3 | grep 'receiver' | awk '{{ print $3,$5,$7 }}' | cut -d '-' --complement -f1) >> {:s}".format(delay, bw, j, transfert_size, h2ip, client_file)
+
+            net["h1"].cmd(cmd_server)
+
+            cmd_client = "echo '{:d} {:d} {:d} '$(iperf3 -n {:d}M -c {:s} -f 'm' | tail -n 3 | grep 'receiver' | awk '{{ print $3,$5,$7 }}' | cut -d '-' --complement -f1) >> {:s}".format(delay, bw, j, transfert_size, h1ip, client_file)
       
             print("["+str(delay)+"ms] Launch rapido")
-            net["h2"].cmd(cmd_server)
+
             time.sleep(1)
-            net["h1"].cmd(cmd_client)
+            net["h2"].cmd(cmd_client)
             
         # IPCLI(net)
         

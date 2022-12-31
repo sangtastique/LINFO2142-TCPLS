@@ -6,11 +6,11 @@ import os
 import sys
 import numpy as np
 
-n_iter = 10
-transfert_size = 10
-bw_from = 2
-bw_to = 20
-bw_step = 2
+n_iter = 15
+transfert_size = 20
+bw_from = 5
+bw_to = 101
+bw_step = 5
 
 filename = "simple_link_different_bw_tcp.txt"
 
@@ -38,17 +38,20 @@ for bwdth in np.arange(bw_from, bw_to, bw_step):
         time.sleep(1)
 
         h2ip = net["h2"].IP()
+        h1ip = net["h1"].IP()
 
-        cmd_server = "iperf3 -s &"
-        net["h2"].cmd(cmd_server)
+        cmd_server = "iperf3 -s -1 &"
 
         for j in range(0, n_iter):
             time.sleep(1)
-            cmd_client = "echo '{:d} {:d} '$(iperf3 -n {:d}M -c {:s} -f 'm' -R | tail -n 3 | grep 'receiver' | awk '{{ print $3,$5,$7 }}' | cut -d '-' --complement -f1) >> {:s}".format(bwdth, j, transfert_size, h2ip, client_file)
 
-            print("["+str(bwdth)+"MB] Launch rapido")
+            net["h1"].cmd(cmd_server)
+
+            cmd_client = "echo '{:d} {:d} '$(iperf3 -n {:d}M -c {:s} -f 'm' | tail -n 3 | grep 'receiver' | awk '{{ print $5,$3,$7 }}' | cut -d '-' --complement -f1) >> {:s}".format(bwdth, j, transfert_size, h1ip, client_file)
+
+            print("["+str(bwdth)+"Mb] Launch rapido")
             time.sleep(1)
-            net["h1"].cmd(cmd_client)
+            net["h2"].cmd(cmd_client)
             
         
     finally:

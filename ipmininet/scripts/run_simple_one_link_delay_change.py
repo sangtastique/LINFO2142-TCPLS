@@ -8,9 +8,9 @@ import numpy as np
 
 n_iter = 30
 transfert_size = 10
-bw = 10
-delay_from = 5
-delay_to = 100
+bw = 5
+delay_from = 110
+delay_to = 201
 delay_step = 15
 
 filename = "simple_link_different_delay.txt"
